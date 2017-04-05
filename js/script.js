@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    'use strict';
     var playerMoves = [];
     var tempPlayerMoves = [];
     var currLength = 0;
