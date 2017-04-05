@@ -9,9 +9,13 @@ $(document).ready(function () {
     var start = false;
     var strict = false;
     var gameArr = [];
-    var obj;
+    var obj, color1, color2, audio, sound;
+    var counter = 0;
+    var goodMove = false;
+    var done = false;
 
     function createGame() {
+        gameArr = [];
         for (var i = 0; i < 20; i = i + 1) {
             var x = Math.floor((Math.random() * 4) + 1);
             gameArr.push('s' + x);
@@ -19,35 +23,83 @@ $(document).ready(function () {
     }
 
     function computerTurn() {
-
+        done = false;
+        if (playerMoves[playerMoves.length - 1] === gameArr[playerMoves.length - 1]) {
+            goodMove = true;
+        } else {
+            goodMove = false;
+        }
+        if (counter === 0) {
+            counter = counter + 1;
+            for (var i = 0; i < counter; i = i + 1) {
+                playNow(gameArr[i]);
+            }
+        } else if (goodMove && counter < 20) {
+            counter = counter + 1;
+            for (var i = 0; i < counter; i = i + 1) {
+                setTimeout(function () {
+                    playNow(gameArr[i]);
+                    console.log('hit' + i);
+                }, 1000);
+            }
+        } else {
+            buzzer.play();
+        }
+        return done = true;
     }
 
-    function playNow(color, audio, s) {
+
+    function playNow(s, p) {
         if (s === 's1') {
+            color1 = '#00ff6e';
+            audio = 'sounds/simonSound1.mp3';
             obj = '#inner-1';
         } else if (s === 's2') {
+            color1 = '#fc2530';
+            audio = 'sounds/simonSound2.mp3';
             obj = '#inner-2';
         } else if (s === 's3') {
+            color1 = '#ffd014';
+            audio = 'sounds/simonSound3.mp3';
             obj = '#inner-3';
         } else if (s === 's4') {
+            color1 = '#168aff';
+            audio = 'sounds/simonSound4.mp3';
             obj = '#inner-4';
+        } else {
+            console.log('Wrong s parameter in playNow(s)');
         }
-        if (start) {
-            $(obj).css('background-color', color);
+        if (start && p === 'p' && playerMoves.length > counter) {
+            $(obj).css('background-color', color1);
             //Push player's move to playerMoves array
             playerMoves.push(s);
             //Create sound object
-            s = new Audio(audio);
-            //Trigger function to compare with gameArr
-            compareMoves();
+            sound = new Audio(audio);
             //Play sound
-            s.play();
+            sound.play();
+            //Trigger function to compare with gameArr
+            compareMoves(s);
+        } else {
+            $(obj).css('background-color', color1);
+            sound = new Audio(audio);
+            sound.play();
         }
     }
 
+    function compareMoves(z) {
+        if (z === gameArr[gameArr.length - 1]) {
+            console.log('ok');
+        } else {
+            console.log('NOT ok');
+        }
+
+
+    }
+
+
     //Add highlight and sound when pressed
     $('#inner-1').on('mousedown', function () {
-        playNow('#00ff6e', 'sounds/simonSound1.mp3', 's1');
+        playNow('s1', 'p');
     });
     //Back to default state when moseover on mouse up
     $('#inner-1').on('mouseout mouseup', function () {
@@ -55,7 +107,7 @@ $(document).ready(function () {
     });
 
     $('#inner-2').on('mousedown', function () {
-        playNow('#fc2530', 'sounds/simonSound2.mp3', 's2');
+        playNow('s2', 'p');
     });
 
     $('#inner-2').on('mouseout mouseup', function () {
@@ -63,7 +115,7 @@ $(document).ready(function () {
     });
 
     $('#inner-3').on('mousedown', function () {
-        playNow('#ffd014', 'sounds/simonSound3.mp3', 's3');
+        playNow('s3', 'p');
     });
 
     $('#inner-3').on('mouseout mouseup', function () {
@@ -71,7 +123,7 @@ $(document).ready(function () {
     });
 
     $('#inner-4').on('mousedown', function () {
-        playNow('#168aff', 'sounds/simonSound4.mp3', 's4');
+        playNow('s4', 'p');
     });
 
     $('#inner-4').on('mouseout mouseup', function () {
@@ -79,15 +131,12 @@ $(document).ready(function () {
     });
 
 
-    function compareMoves() {
-        console.log(playerMoves);
-    }
-
     //Reads controls states and set it to true or false
     $('#start').on('click', function () {
         if (checked) {
             $(this).toggleClass('active');
             if ($(this).hasClass('active')) {
+                counter = 0;
                 createGame();
                 computerTurn();
                 playerMoves = [];
