@@ -1,50 +1,44 @@
+/*jslint browser: true*/
+/*global $, Audio, jQuery, alert*/
 $(document).ready(function () {
     'use strict';
-    var playerMoves = [];
-    var s1, s2, s3, s4;
-    var buzzer = new Audio('sounds/buzzer.mp3');
-    var checked = false;
-    var start = false;
-    var strict = false;
-    var gameArr = [];
-    var obj, color1, audio, sound;
-    var counter = 0;
-    var done = false;
-    var playerCounter = 0;
-    var strict = false;
+    var playerMoves = [],
+        s1,
+        s2,
+        s3,
+        s4,
+        buzzer = new Audio('sounds/buzzer.mp3'),
+        checked = false,
+        start = false,
+        strict = false,
+        gameArr = [],
+        obj,
+        color1,
+        audio,
+        sound,
+        counter = 0,
+        done = false,
+        playerCounter = 0;
+
 
     function createGame() {
+        var i, x;
         gameArr = [];
-        for (var i = 0; i < 20; i = i + 1) {
-            var x = Math.floor((Math.random() * 4) + 1);
+        for (i = 0; i < 20; i = i + 1) {
+            x = Math.floor((Math.random() * 4) + 1);
             gameArr.push('s' + x);
         }
     }
 
     function setIntervalX(callback, delay, repetitions) {
-        var x = 0;
-        var intervalID = window.setInterval(function () {
+        var x = 0,
+            intervalID;
+        intervalID = window.setInterval(function () {
             callback();
             if (++x === repetitions) {
                 window.clearInterval(intervalID);
             }
         }, delay);
-    }
-
-    function computerTurn() {
-        var i = 0;
-        done = false;
-        counter = counter + 1;
-        setIntervalX(function () {
-            if (checked && start) {
-                playNow(gameArr[i]);
-                i = i + 1;
-            }
-            if (i === counter) {
-                done = true;
-            }
-        }, 1000, counter);
-        playerCounter = 0;
     }
 
     function playNow(s, p) {
@@ -73,7 +67,7 @@ $(document).ready(function () {
             sound.play();
             //Trigger function to compare with gameArr
             compareMoves(s);
-        } else if (p != 'p') {
+        } else if (p !== 'p') {
             $(obj).css('background-color', color1);
             sound = new Audio(audio);
             sound.play();
@@ -93,21 +87,39 @@ $(document).ready(function () {
             if (playerCounter === counter) {
                 computerTurn();
             }
-        } else if (z != gameArr[playerCounter] && strict === true) {
+        } else if (z !== gameArr[playerCounter] && strict === true) {
             counter = 0;
             done = false;
             start = false;
             buzzer.play();
             $('#start').removeClass('active');
-        } else if (z != gameArr[playerCounter] && strict === false) {
+        } else if (z !== gameArr[playerCounter] && strict === false) {
             done = false;
             buzzer.play();
             buzzer.onended = function () {
                 counter = counter - 1;
                 computerTurn();
-            }
+            };
         }
     }
+
+    function computerTurn() {
+        var i = 0;
+        done = false;
+        counter = counter + 1;
+        setIntervalX(function () {
+            if (checked && start) {
+                playNow(gameArr[i]);
+                i = i + 1;
+            }
+            if (i === counter) {
+                done = true;
+            }
+        }, 1000, counter);
+        playerCounter = 0;
+    }
+
+
 
     //Add highlight and sound when pressed
     $('#inner-1').on('mousedown', function () {
