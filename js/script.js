@@ -2,8 +2,7 @@
 /*global $, Audio, jQuery, alert*/
 $(document).ready(function () {
     'use strict';
-    var playerMoves = [],
-        s1,
+    var s1,
         s2,
         s3,
         s4,
@@ -18,7 +17,6 @@ $(document).ready(function () {
         audio,
         level = 750,
         time = 0,
-        mineTimer,
         timer,
         sound,
         counter = 0,
@@ -26,15 +24,17 @@ $(document).ready(function () {
         win = false,
         playerCounter = 0;
 
+    //Create random game array with 20 elements
     function createGame() {
         var i, x;
         gameArr = [];
-        for (i = 0; i < 5; i = i + 1) {
+        for (i = 0; i < 20; i = i + 1) {
             x = Math.floor((Math.random() * 4) + 1);
             gameArr.push('s' + x);
         }
     }
-
+    //Function from here: http://stackoverflow.com/questions/2956966/javascript-telling-setinterval-to-only-fire-x-amount-of-times
+    //Allows setInterval to only fire x amount of times
     function setIntervalX(callback, delay, repetitions) {
         var x = 0,
             intervalID;
@@ -46,10 +46,12 @@ $(document).ready(function () {
         }, delay);
     }
 
+    //AI moves
     function computerTurn() {
         var i = 0;
         done = false;
         counter = counter + 1;
+        //Thera are 3 speed levels which seed up after 5th, 9th and 13th step
         if (counter >= 5 && counter < 9) {
             level = 500;
         } else if (counter >= 9 && counter < 13) {
@@ -60,6 +62,7 @@ $(document).ready(function () {
             win = true;
             reset();
         }
+        //Display steps counter
         $('#display').html(counter);
         setIntervalX(function () {
             if (checked && start) {
@@ -69,22 +72,24 @@ $(document).ready(function () {
             if (i === counter) {
                 done = true;
                 time = 0;
+                //Fires countdown timer
                 countdown();
             }
         }, level + 500, counter);
         playerCounter = 0;
     }
-
+    //If player won't make a move in 5s there will be buzzer sound and game will reset
     function countdown() {
         time = 0;
         timer = setInterval(function () {
             time = time + 1;
             if (time >= 5) {
-                reset();
+                reset(); //Call reset function
             }
         }, 1000);
     }
 
+    //Resets game depending on 'strict' and 'win' variables
     function reset() {
         clearInterval(timer);
         if (strict && !win) {
@@ -116,6 +121,7 @@ $(document).ready(function () {
         }
     }
 
+    //Function fires whenever player presses
     function playNow(s, p) {
         clearInterval(timer);
         if (s === 's1') {
@@ -159,6 +165,7 @@ $(document).ready(function () {
         }
     }
 
+    //Compare players move with corresponding AI move
     function compareMoves(z) {
         if (z === gameArr[playerCounter]) {
             playerCounter = playerCounter + 1;
@@ -216,6 +223,7 @@ $(document).ready(function () {
                 start = true;
             } else {
                 $('#display').html('0');
+                //Clear timer for 5s countdown
                 clearInterval(timer);
                 start = false;
             }
@@ -241,10 +249,9 @@ $(document).ready(function () {
             $('#start').removeClass('active');
             start = false;
             checked = false;
+            //Clear timer for 5s countdown
             clearInterval(timer);
             $('#display').html('-');
         }
     });
-
-
 });
