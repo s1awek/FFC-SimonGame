@@ -8,6 +8,7 @@ $(document).ready(function () {
         s3,
         s4,
         buzzer = new Audio('sounds/buzzer.mp3'),
+        tada = new Audio('sounds/tada.mp3'),
         checked = false,
         start = false,
         strict = false,
@@ -15,16 +16,20 @@ $(document).ready(function () {
         obj,
         color1,
         audio,
+        level = 750,
+        time = 0,
+        mineTimer,
+        timer,
         sound,
         counter = 0,
         done = false,
+        win = false,
         playerCounter = 0;
-
 
     function createGame() {
         var i, x;
         gameArr = [];
-        for (i = 0; i < 20; i = i + 1) {
+        for (i = 0; i < 5; i = i + 1) {
             x = Math.floor((Math.random() * 4) + 1);
             gameArr.push('s' + x);
         }
@@ -41,7 +46,78 @@ $(document).ready(function () {
         }, delay);
     }
 
+    function computerTurn() {
+        var i = 0;
+        done = false;
+        counter = counter + 1;
+        if (counter >= 5 && counter < 9) {
+            level = 500;
+        } else if (counter >= 9 && counter < 13) {
+            level = 250;
+        } else if (counter >= 13 && counter < 20) {
+            level = 50;
+        } else if (counter === 20) {
+            win = true;
+            reset();
+        }
+        $('#display').html(counter);
+        setIntervalX(function () {
+            if (checked && start) {
+                playNow(gameArr[i]);
+                i = i + 1;
+            }
+            if (i === counter) {
+                done = true;
+                time = 0;
+                countdown();
+            }
+        }, level + 500, counter);
+        playerCounter = 0;
+    }
+
+    function countdown() {
+        time = 0;
+        timer = setInterval(function () {
+            time = time + 1;
+            if (time >= 5) {
+                reset();
+            }
+        }, 1000);
+    }
+
+    function reset() {
+        clearInterval(timer);
+        if (strict && !win) {
+            counter = 0;
+            done = false;
+            start = false;
+            buzzer.play();
+            $('#start').removeClass('active');
+        }
+
+        if (!strict && !win) {
+            done = false;
+            buzzer.play();
+            buzzer.onended = function () {
+                counter = counter - 1;
+                computerTurn();
+            };
+        }
+
+        if (win) {
+            tada.play();
+            counter = 0;
+            done = false;
+            createGame();
+            level = 750;
+            win = false;
+            playerCounter = 0;
+            computerTurn();
+        }
+    }
+
     function playNow(s, p) {
+        clearInterval(timer);
         if (s === 's1') {
             color1 = '#00ff6e';
             audio = 'sounds/simonSound1.mp3';
@@ -71,13 +147,15 @@ $(document).ready(function () {
             $(obj).css('background-color', color1);
             sound = new Audio(audio);
             sound.play();
-            setTimeout(function () {
-                $('#inner-1').css('background-color', '#00A74A');
-                $('#inner-2').css('background-color', '#9f0f17');
-                $('#inner-3').css('background-color', '#cca707');
-                $('#inner-4').css('background-color', '#094a8f');
-                return;
-            }, 500);
+            sound.onplay = function () {
+                setTimeout(function () {
+                    $('#inner-1').css('background-color', '#00A74A');
+                    $('#inner-2').css('background-color', '#9f0f17');
+                    $('#inner-3').css('background-color', '#cca707');
+                    $('#inner-4').css('background-color', '#094a8f');
+                    return;
+                }, level);
+            };
         }
     }
 
@@ -88,38 +166,11 @@ $(document).ready(function () {
                 computerTurn();
             }
         } else if (z !== gameArr[playerCounter] && strict === true) {
-            counter = 0;
-            done = false;
-            start = false;
-            buzzer.play();
-            $('#start').removeClass('active');
+            reset();
         } else if (z !== gameArr[playerCounter] && strict === false) {
-            done = false;
-            buzzer.play();
-            buzzer.onended = function () {
-                counter = counter - 1;
-                computerTurn();
-            };
+            reset();
         }
     }
-
-    function computerTurn() {
-        var i = 0;
-        done = false;
-        counter = counter + 1;
-        setIntervalX(function () {
-            if (checked && start) {
-                playNow(gameArr[i]);
-                i = i + 1;
-            }
-            if (i === counter) {
-                done = true;
-            }
-        }, 1000, counter);
-        playerCounter = 0;
-    }
-
-
 
     //Add highlight and sound when pressed
     $('#inner-1').on('mousedown', function () {
@@ -164,6 +215,8 @@ $(document).ready(function () {
                 computerTurn();
                 start = true;
             } else {
+                $('#display').html('0');
+                clearInterval(timer);
                 start = false;
             }
         }
@@ -183,10 +236,15 @@ $(document).ready(function () {
     $('#checkbox').change(function () {
         if ($(this).is(':checked')) {
             checked = true;
+            $('#display').html('0');
         } else {
             $('#start').removeClass('active');
             start = false;
             checked = false;
+            clearInterval(timer);
+            $('#display').html('-');
         }
     });
+
+
 });

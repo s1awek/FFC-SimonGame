@@ -103,8 +103,8 @@ body {
     left: 10px;
     color: #b7ffd6;
     font-size: 44px;
-    padding-left: 6px;
     border: 2px solid #ccc;
+    text-align: center;
 }
 
 #on-off {
@@ -163,15 +163,15 @@ body {
     transition: .4s;
 }
 
-input:checked + .slider {
+input:checked+.slider {
     background-color: #2196F3;
 }
 
-input:focus + .slider {
+input:focus+.slider {
     box-shadow: 0 0 1px #2196F3;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
     -webkit-transform: translateX(26px);
     -ms-transform: translateX(26px);
     transform: translateX(26px);
